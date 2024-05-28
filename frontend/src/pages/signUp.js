@@ -16,7 +16,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // Configurar el ícono de marcador de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -171,6 +171,9 @@ function SignUp() {
                                 <MDBBtn tag='a' color='none' className='mx-3' style={{ color: '#1266f1' }}>
                                     <MDBIcon fab icon='github' size="sm" />
                                 </MDBBtn>
+                            </div>
+                            <div className="text-start">
+                                <p className="mb-0">Already have account <Link to="/login">Sign in here</Link>.</p>
                             </div>
                         </MDBCardBody>
                     </MDBCard>

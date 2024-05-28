@@ -29,13 +29,17 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function Profile() {
-    const { actions } = useContext(Context);
+    const { actions, store } = useContext(Context);
     const { userId } = useParams();
     const [user, setUser] = useState(null);
     const [city, setCity] = useState('');
     const [editing, setEditing] = useState(false);
     const [latitudeVariable, setLatitudeVariable] = useState(null);
     const [longitudeVariable, setLongitudeVariable] = useState(null);
+    const [editingCity, setEditingCity] = useState('');
+    const [newPassword, setNewPassword] = useState(''); // Estado para la nueva contraseña
+
+    console.log(user)
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -46,7 +50,7 @@ export default function Profile() {
 
                 // Obtener ciudad desde las coordenadas
                 if (userData.location) {
-                    const { lat, lng } = userData.location; // Actualizamos para obtener lat y lng en lugar de latitude y longitude
+                    const { lat, lng } = userData.location;
 
                     setLatitudeVariable(lat);
                     setLongitudeVariable(lng);
@@ -72,6 +76,22 @@ export default function Profile() {
         }
     };
 
+    const fetchCoordinatesFromCity = async (city) => {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?city=${city}&format=json`);
+            const data = await response.json();
+            if (data.length > 0) {
+                const { lat, lon } = data[0];
+                return { lat: parseFloat(lat), lng: parseFloat(lon) };
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching coordinates:', error);
+            return null;
+        }
+    };
+
     const handleEdit = () => {
         setEditing(true);
     };
@@ -80,11 +100,11 @@ export default function Profile() {
         const updatedData = {
             username: user.username,
             email: user.email,
-            password: user.password,
+            password: newPassword ? newPassword : undefined, // Solo enviar la contraseña si se ha proporcionado una nueva
             programming_language: user.programming_language,
             location: {
-                lat: latitudeVariable, // Actualiza la latitud
-                lng: longitudeVariable // Actualiza la longitud
+                lat: latitudeVariable,
+                lng: longitudeVariable
             },
             avatar_url: user.avatar_url,
             description: user.description
@@ -103,18 +123,30 @@ export default function Profile() {
         }
     };
 
-
     const handleCancel = () => {
         setEditing(false);
     };
 
-    console.log(latitudeVariable)
-    console.log(longitudeVariable)
-    console.log(user)
+    const handleCheck = async () => {
+        const coordinates = await fetchCoordinatesFromCity(editingCity);
+        if (coordinates) {
+            setLatitudeVariable(coordinates.lat);
+            setLongitudeVariable(coordinates.lng);
+            setUser((prevUser) => ({
+                ...prevUser,
+                location: {
+                    lat: coordinates.lat,
+                    lng: coordinates.lng
+                }
+            }));
+        } else {
+            console.error('City not found');
+        }
+    };
 
     return (
         <section style={{ backgroundColor: '#eee' }}>
-            <MDBContainer className="py-5">
+            <MDBContainer className="py-5 mt-5">
                 <MDBRow>
                     <MDBCol lg="4">
                         <MDBCard className="mb-4">
@@ -194,21 +226,21 @@ export default function Profile() {
                                                     onChange={(e) => setUser({ ...user, email: e.target.value })}
                                                 />
                                             </MDBCol>
+
                                         </MDBRow>
                                         <hr />
-                                        <MDBRow>
+                                        {editing && <MDBRow>
                                             <MDBCol sm="3">
                                                 <label>Password</label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
                                                     type="password"
-                                                    value={user.password}
                                                     disabled={!editing}
                                                     onChange={(e) => setUser({ ...user, password: e.target.value })}
                                                 />
                                             </MDBCol>
-                                        </MDBRow>
+                                        </MDBRow>}
                                         <hr />
                                         <MDBRow>
                                             <MDBCol sm="3">
@@ -231,20 +263,21 @@ export default function Profile() {
                                             </MDBCol>
                                         </MDBRow>
                                         <hr />
-                                        <MDBRow>
+                                        {editing && <MDBRow>
                                             <MDBCol sm="3">
                                                 <label>Location</label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
                                                     type="text"
-                                                    value={city}
+                                                    value={editingCity}
                                                     disabled={!editing}
-                                                    onChange={(e) => setCity(e.target.value)}
+                                                    onChange={(e) => setEditingCity(e.target.value)}
                                                 />
                                             </MDBCol>
-                                        </MDBRow>
-                                        <hr />
+                                            <MDBBtn outline className="m-2" onClick={handleCheck}>Check</MDBBtn>
+                                            <hr />
+                                        </MDBRow>}
                                         <MDBRow>
                                             {latitudeVariable && longitudeVariable ? (
                                                 <MapContainer center={[latitudeVariable, longitudeVariable]} zoom={12} style={{ height: '200px', width: '100%' }}>

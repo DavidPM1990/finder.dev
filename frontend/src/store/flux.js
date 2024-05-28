@@ -2,6 +2,7 @@ const getState = ({ getStore, getActions, setStore }) => {
     return {
         store: {
             users: [],
+
         },
         actions: {
             createUser: async (username, email, password, programming_language, location) => {
@@ -20,7 +21,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         }),
                     });
                     const data = await resp.json();
-                    console.log(data);
+
 
                     setStore({ users: data });
 
@@ -48,7 +49,14 @@ const getState = ({ getStore, getActions, setStore }) => {
                         // Almacena el token en localStorage
                         localStorage.setItem("jwt-token", data.access_token);
                         console.log("User signed in successfully!");
-                        return true;
+
+
+                        setStore({ users: { id: data.user_id } })
+
+
+
+
+                        return data;
                     } else {
                         // Si hay un error, lógica para manejarlo (p. ej., mostrar un mensaje de error)
                         return false;
@@ -58,6 +66,17 @@ const getState = ({ getStore, getActions, setStore }) => {
                     console.log("Error signing in:", error);
                     return false;
                 }
+            },
+            logOut: () => {
+                // Borra el objeto user del estado global
+                console.log("Executing logOut method");
+                setStore({ users: [] });
+
+                // Borra el token del almacenamiento local
+                localStorage.removeItem("jwt-token");
+
+                // Muestra un mensaje de éxito
+                // toast.success("Has cerrado sesión correctamente");
             },
             getProfile: async (userId) => {
                 try {
@@ -77,7 +96,11 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
 
                     const data = await response.json();
-                    console.log("User profile:", data);
+
+                    if (JSON.stringify(data) !== JSON.stringify(getStore().users)) {
+                        setStore({ users: data });
+                    }
+
                     return data;
                 } catch (error) {
                     console.error("Error getting user profile:", error);
@@ -112,7 +135,17 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                     const updatedUser = await response.json(); // Obtener el usuario actualizado del backend
                     console.log("User profile updated:", updatedUser);
-                    return updatedUser;
+
+                    setStore(prevStore => ({
+                        ...prevStore,
+                        users: prevStore.users.map(user => {
+                            if (user.id === updatedUser.id) {
+                                return updatedUser;
+                            }
+                            return user;
+                        })
+                    }));
+
                 } catch (error) {
                     console.error("Error updating user profile:", error);
                     return null;

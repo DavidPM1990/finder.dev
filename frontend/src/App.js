@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 import injectContext from "./store/appContext";
 
@@ -10,6 +10,8 @@ import Profile from './pages/profile';
 import NotFound from './pages/notFound';
 import Users from './pages/users';
 
+import Sidebar from './components/sidebar';
+
 const App = () => {
   const basename = process.env.BASENAME || "";
 
@@ -17,13 +19,13 @@ const App = () => {
     <div>
       <BrowserRouter basename={basename}>
         {/* <ScrollToTop> */}
-        {/* <RenderNavBarIfNotAuthRoutes /> */}
+        <RenderNavBarIfNotAuthRoutes />
         <Routes>
           <Route path="/login" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/users" element={<Users />} />
+          <Route path="/" element={<Users />} />
           <Route path="/profile/:userId" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/notfound" element={<NotFound />} />
         </Routes>
         {/* <RenderFooterIfNotAuthRoutes />
         </ScrollToTop> */}
@@ -32,11 +34,11 @@ const App = () => {
   );
 };
 
-// const RenderNavBarIfNotAuthRoutes = () => {
-//   const location = useLocation();
-//   const isAuthRoute = location.pathname === "/login" || location.pathname === "/signup";
-//   return !isAuthRoute && <Navbar />;
-// };
+const RenderNavBarIfNotAuthRoutes = () => {
+  const location = useLocation();
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/signup";
+  return !isAuthRoute && <Sidebar />;
+};
 
 // const RenderFooterIfNotAuthRoutes = () => {
 //   const location = useLocation();

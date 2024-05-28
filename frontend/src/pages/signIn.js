@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Context } from "../store/appContext";
 import '../styles/signUp.css';
 import {
@@ -14,16 +14,18 @@ import {
 } from 'mdb-react-ui-kit';
 
 const SignIn = () => {
-    const { actions } = useContext(Context);
+    const { actions, store } = useContext(Context);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+
+    console.log(store.users)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const success = await actions.signIn(username, password);
         if (success) {
-            navigate('/users'); // Cambiado de history.push a navigate
+            navigate('/'); // Cambiado de history.push a navigate
         } else {
             alert('Error signing in');
         }
@@ -71,6 +73,9 @@ const SignIn = () => {
                                 <MDBBtn tag='a' color='none' className='mx-3' style={{ color: '#1266f1' }}>
                                     <MDBIcon fab icon='github' size="sm" />
                                 </MDBBtn>
+                            </div>
+                            <div className="text-start">
+                                <p className="mb-0">Don't have an account yet? <Link to="/signup">Sign up here</Link>.</p>
                             </div>
                         </MDBCardBody>
                     </MDBCard>

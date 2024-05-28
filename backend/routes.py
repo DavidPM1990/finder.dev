@@ -157,13 +157,20 @@ def profile(user_id):
         data = request.get_json()
 
         # Actualizo los campos relevantes
-        current_user.username = data.get('username', current_user.username)
-        current_user.email = data.get('email', current_user.email)
-        current_user.password = generate_password_hash(data.get('password', current_user.password)).decode('utf-8')
-        current_user.programming_language = data.get('programming_language', current_user.programming_language)
-        current_user.location = data.get('location', current_user.location)
-        current_user.avatar_url = data.get('avatar_url', current_user.avatar_url)
-        current_user.description = data.get('description', current_user.description)
+        if 'username' in data:
+            current_user.username = data['username']
+        if 'email' in data:
+            current_user.email = data['email']
+        if 'password' in data:
+            current_user.password = generate_password_hash(data['password']).decode('utf-8')
+        if 'programming_language' in data:
+            current_user.programming_language = data['programming_language']
+        if 'location' in data:
+            current_user.location = data['location']
+        if 'avatar_url' in data:
+            current_user.avatar_url = data['avatar_url']
+        if 'description' in data:
+            current_user.description = data['description']
 
         # Guardo los cambios en la base de datos
         db.session.commit()
@@ -171,3 +178,4 @@ def profile(user_id):
         final_data = {**current_user.serialize(), **message}
 
         return jsonify(final_data), 200
+
