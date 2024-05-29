@@ -2,6 +2,8 @@ const getState = ({ getStore, getActions, setStore }) => {
     return {
         store: {
             users: [],
+            allUsers: [],
+            userPartner: []
 
         },
         actions: {
@@ -107,6 +109,30 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return null;
                 }
             },
+            getProfilePartner: async (userId) => {
+                try {
+                    const response = await fetch(`http://localhost:5000/api/profile-partner/${userId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        console.error("Error getting user profile:", data.message);
+                        return null;
+                    }
+
+                    const data = await response.json();
+
+                    return data;
+                } catch (error) {
+                    console.error("Error getting user profile:", error);
+                    return null;
+                }
+            },
+
             editProfile: async (userId, updatedData) => {
                 try {
                     const token = localStorage.getItem("jwt-token");
@@ -148,6 +174,34 @@ const getState = ({ getStore, getActions, setStore }) => {
 
                 } catch (error) {
                     console.error("Error updating user profile:", error);
+                    return null;
+                }
+            },
+            getAllUsers: async () => {
+                try {
+                    const token = localStorage.getItem("jwt-token");
+                    const response = await fetch("http://localhost:5000/api/users", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        console.error("Error getting all users:", data.error);
+                        return null;
+                    }
+
+                    const data = await response.json();
+
+                    // Actualiza el estado global con la lista de todos los usuarios
+                    setStore({ allUsers: data.users });
+
+                    return data.users;
+                } catch (error) {
+                    console.error("Error getting all users:", error);
                     return null;
                 }
             },

@@ -23,9 +23,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link } from 'react-router-dom';
 import { Context } from "../store/appContext";
-
-
-
+import { useMediaQuery } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -56,10 +54,15 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function Sidebar() {
     const theme = useTheme();
-    const [open, setOpen] = useState(false);
+    const isLaptopOrLarger = useMediaQuery(theme.breakpoints.up('md'));
+    const [open, setOpen] = useState(isLaptopOrLarger);
     const { store, actions } = useContext(Context);
 
     const currentUser = store.users;
+
+    useEffect(() => {
+        setOpen(isLaptopOrLarger);
+    }, [isLaptopOrLarger]);
 
     const handleLogout = () => {
         console.log("Logging out...");
@@ -103,9 +106,13 @@ export default function Sidebar() {
                         boxSizing: 'border-box',
                     },
                 }}
-                variant="persistent"
+                variant={isLaptopOrLarger ? "persistent" : "temporary"}
                 anchor="left"
                 open={open}
+                onClose={!isLaptopOrLarger ? handleDrawerClose : undefined}
+                ModalProps={{
+                    keepMounted: true,
+                }}
             >
                 <DrawerHeader>
                     <IconButton onClick={handleDrawerClose}>
@@ -127,11 +134,11 @@ export default function Sidebar() {
                         </ListItem>
                     ))}
                     <ListItem key="Find your Partner" disablePadding>
-                        <ListItemButton component={Link} to="/users" >
+                        <ListItemButton component={Link} to="/" >
                             <ListItemIcon>
                                 <SearchIcon />
                             </ListItemIcon>
-                            <ListItemText primary="Find yout Partner" />
+                            <ListItemText primary="Find your Partner" />
                         </ListItemButton>
                     </ListItem>
                     <ListItem key="LogOut" disablePadding>

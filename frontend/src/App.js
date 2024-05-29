@@ -9,7 +9,7 @@ import SignUp from './pages/signUp';
 import Profile from './pages/profile';
 import NotFound from './pages/notFound';
 import Users from './pages/users';
-
+import PartnerProfile from './pages/partnerProfile';
 import Sidebar from './components/sidebar';
 
 const App = () => {
@@ -24,6 +24,7 @@ const App = () => {
           <Route path="/login" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/" element={<Users />} />
+          <Route path="/partner-profile/:userId" element={<PartnerProfile />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/notfound" element={<NotFound />} />
         </Routes>

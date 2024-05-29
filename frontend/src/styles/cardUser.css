@@ -1,0 +1,45 @@
+.gradient-custom {
+
+    background: #f6d365;
+
+
+    background: -webkit-linear-gradient(to right bottom, rgba(246, 211, 101, 1), rgba(253, 160, 133, 1));
+
+
+    background: linear-gradient(to right bottom, rgba(246, 211, 101, 1), rgba(253, 160, 133, 1))
+}
+
+.card-enter {
+    opacity: 0;
+    transform: translateX(100%);
+
+}
+
+.card-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 500ms, transform 500ms;
+}
+
+.card-exit {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.card-exit-active {
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 500ms, transform 500ms;
+}
+
+@media (max-width: 1024px) {
+    .mobile {
+        height: 40vh;
+        padding-bottom: 50px;
+    }
+
+    .mobile h5 {
+
+        margin-top: -48px;
+    }
+}

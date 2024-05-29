@@ -238,10 +238,11 @@ export default function Profile() {
                                                     type="password"
                                                     disabled={!editing}
                                                     onChange={(e) => setUser({ ...user, password: e.target.value })}
+                                                    className='mb-2'
                                                 />
                                             </MDBCol>
+                                            <hr />
                                         </MDBRow>}
-                                        <hr />
                                         <MDBRow>
                                             <MDBCol sm="3">
                                                 <label>Programming Language</label>

@@ -47,7 +47,7 @@ def create_user():
     return jsonify({'message': 'User created successfully'}), 201
 
 @api.route('/users', methods=['GET'])
-def get_all_users():
+def get_users():
     try:
         users = User.query.all()
 
@@ -178,4 +178,16 @@ def profile(user_id):
         final_data = {**current_user.serialize(), **message}
 
         return jsonify(final_data), 200
+    
+@api.route("/profile-partner/<int:user_id>", methods=["GET"])
+def profilePartner(user_id):
+    # Obtengo la información del usuario desde la base de datos
+    user = User.query.get(user_id)
+
+    # Verifico si el usuario existe
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+
+    # Devuelvo los detalles del usuario
+    return jsonify(user.serialize()), 200
 
