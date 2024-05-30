@@ -81,18 +81,18 @@ export default function Sidebar() {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" open={open}>
+            <AppBar position="fixed" open={open} sx={{ backgroundColor: 'white' }}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         onClick={handleDrawerOpen}
                         edge="start"
-                        sx={{ mr: 2, ...(open && { display: 'none' }) }}
+                        sx={{ mr: 2, ...(open && { display: 'none' }), color: '#000000' }}
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap component="div">
+                    <Typography variant="h6" noWrap component="div" sx={{ color: 'black' }}>
                         Finder.dev
                     </Typography>
                 </Toolbar>

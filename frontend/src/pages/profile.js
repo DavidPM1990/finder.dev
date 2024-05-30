@@ -37,14 +37,19 @@ export default function Profile() {
     const [latitudeVariable, setLatitudeVariable] = useState(null);
     const [longitudeVariable, setLongitudeVariable] = useState(null);
     const [editingCity, setEditingCity] = useState('');
-    const [newPassword, setNewPassword] = useState(''); // Estado para la nueva contraseña
+    const [newPassword, setNewPassword] = useState('');
+    const [followers, setFollowers] = useState([]);
 
-    console.log(user)
 
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
                 const userData = await actions.getProfile(userId);
+
+                const followed = await actions.getFollowedUsers(userId);
+
+                setFollowers(followed);
+
 
                 setUser(userData);
 
@@ -62,7 +67,10 @@ export default function Profile() {
             }
         };
         fetchUserProfile();
-    }, [actions, userId]);
+
+        // Add the dependency array to ensure this effect only runs once after the initial render
+    }, []);
+
 
     const fetchCityFromCoordinates = async (latitude, longitude) => {
         try {
@@ -144,8 +152,13 @@ export default function Profile() {
         }
     };
 
+    const likes_received = user ? user.likes_received.length : 0;
+
+
+    console.log(likes_received)
+
     return (
-        <section style={{ backgroundColor: '#eee' }}>
+        <section style={{ backgroundColor: '#000000' }}>
             <MDBContainer className="py-5 mt-5">
                 <MDBRow>
                     <MDBCol lg="4">
@@ -160,6 +173,21 @@ export default function Profile() {
                                 />
                                 <p className="text-muted mb-1">Full Stack Developer</p>
                                 <p className="text-muted mb-4">{city}</p>
+                                <div className="d-flex justify-content-around rounded-3 p-2 mb-2"
+                                    style={{ backgroundColor: '#efefef' }}>
+                                    <div>
+                                        <p className="small text-muted mb-1">Projects</p>
+                                        <p className="mb-0">0</p>
+                                    </div>
+                                    <div className="px-3">
+                                        <p className="small text-muted mb-1">Followers</p>
+                                        <p className="mb-0">{likes_received ? likes_received.length : 0}</p>
+                                    </div>
+                                    <div>
+                                        <p className="small text-muted mb-1">Following</p>
+                                        <p className="mb-0">{followers.length}</p>
+                                    </div>
+                                </div>
                                 <div className="d-flex justify-content-center mb-2">
                                     {!editing && <MDBBtn onClick={handleEdit}>Edit</MDBBtn>}
                                     {editing && <MDBBtn onClick={handleSave} outline className="ms-1">Save</MDBBtn>}
@@ -202,7 +230,7 @@ export default function Profile() {
                                     <>
                                         <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>User Name</label>
+                                                <label><strong>User Name</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
@@ -210,13 +238,15 @@ export default function Profile() {
                                                     value={user.username}
                                                     disabled={!editing}
                                                     onChange={(e) => setUser({ ...user, username: e.target.value })}
+                                                    className='w-100'
+
                                                 />
                                             </MDBCol>
                                         </MDBRow>
                                         <hr />
                                         <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>Email</label>
+                                                <label><strong>Email</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
@@ -224,6 +254,7 @@ export default function Profile() {
                                                     value={user.email}
                                                     disabled={!editing}
                                                     onChange={(e) => setUser({ ...user, email: e.target.value })}
+                                                    className='w-100'
                                                 />
                                             </MDBCol>
 
@@ -231,21 +262,21 @@ export default function Profile() {
                                         <hr />
                                         {editing && <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>Password</label>
+                                                <label><strong>Password</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
                                                     type="password"
                                                     disabled={!editing}
                                                     onChange={(e) => setUser({ ...user, password: e.target.value })}
-                                                    className='mb-2'
+                                                    className='mb-2 w-100'
                                                 />
                                             </MDBCol>
                                             <hr />
                                         </MDBRow>}
                                         <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>Programming Language</label>
+                                                <label><strong>Programming Language</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <select
@@ -266,7 +297,7 @@ export default function Profile() {
                                         <hr />
                                         {editing && <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>Location</label>
+                                                <label><strong>Location</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
                                                 <input
@@ -274,6 +305,8 @@ export default function Profile() {
                                                     value={editingCity}
                                                     disabled={!editing}
                                                     onChange={(e) => setEditingCity(e.target.value)}
+                                                    className='w-100'
+
                                                 />
                                             </MDBCol>
                                             <MDBBtn outline className="m-2" onClick={handleCheck}>Check</MDBBtn>
@@ -292,14 +325,18 @@ export default function Profile() {
                                         <hr />
                                         <MDBRow>
                                             <MDBCol sm="3">
-                                                <label>Description</label>
+                                                <label><strong>Description</strong></label>
                                             </MDBCol>
                                             <MDBCol sm="9">
-                                                <textarea
-                                                    value={user.description}
-                                                    disabled={!editing}
-                                                    onChange={(e) => setUser({ ...user, description: e.target.value })}
-                                                />
+                                                {editing ? (
+                                                    <textarea
+                                                        value={user.description}
+                                                        onChange={(e) => setUser({ ...user, description: e.target.value })}
+                                                        className='w-100'
+                                                    />
+                                                ) : (
+                                                    <p>{user.description}</p>
+                                                )}
                                             </MDBCol>
                                         </MDBRow>
                                     </>

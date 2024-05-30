@@ -54,8 +54,14 @@ class Like(db.Model):
     liked_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    def __repr__(self):
-        return f"<Like {self.user_id} -> {self.liked_user_id}>"
+    def serialize(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'liked_user_id': self.liked_user_id,
+            'timestamp': self.timestamp
+            # Agrega más campos si es necesario
+        }
 
 class Match(db.Model):
     __tablename__ = 'match'

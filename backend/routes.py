@@ -7,7 +7,8 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import JWTManager
 from database import db
-from models import User
+from models import User, Like
+from flask_cors import cross_origin
 
 api = Blueprint('api', __name__)
 
@@ -190,4 +191,78 @@ def profilePartner(user_id):
 
     # Devuelvo los detalles del usuario
     return jsonify(user.serialize()), 200
+
+
+@api.route("/like/<int:liked_user_id>", methods=["POST"])
+@jwt_required()
+def like_user(liked_user_id):
+    current_user_id = get_jwt_identity()
+
+    # Verifica si el usuario que da like y el usuario que recibe like son el mismo
+    if current_user_id == liked_user_id:
+        return jsonify({"message": "You cannot like yourself"}), 400
+
+    # Verifica si el usuario que recibe like existe
+    liked_user = User.query.get(liked_user_id)
+    if not liked_user:
+        return jsonify({"message": "Liked user not found"}), 404
+
+    # Verifica si el usuario ya le ha dado like al usuario objetivo
+    existing_like = Like.query.filter_by(user_id=current_user_id, liked_user_id=liked_user_id).first()
+    if existing_like:
+        return jsonify({"message": "You have already liked this user"}), 400
+
+    # Crea una nueva instancia de Like
+    new_like = Like(user_id=current_user_id, liked_user_id=liked_user_id)
+
+    # Guarda la instancia de Like en la base de datos
+    db.session.add(new_like)
+    db.session.commit()
+
+    return jsonify({"message": "User liked successfully"}), 201
+
+@api.route("/dislike/<int:liked_user_id>", methods=["POST"])
+@jwt_required()
+def dislike_user(liked_user_id):
+    current_user_id = get_jwt_identity()
+
+    # Verifica si el usuario que da dislike y el usuario que recibe dislike son el mismo
+    if current_user_id == liked_user_id:
+        return jsonify({"message": "You cannot dislike yourself"}), 400
+
+    # Verifica si el usuario que recibe dislike existe
+    liked_user = User.query.get(liked_user_id)
+    if not liked_user:
+        return jsonify({"message": "Liked user not found"}), 404
+
+    # Verifica si el usuario ya le ha dado like al usuario objetivo
+    existing_like = Like.query.filter_by(user_id=current_user_id, liked_user_id=liked_user_id).first()
+    if not existing_like:
+        return jsonify({"message": "You have not liked this user"}), 400
+
+    # Elimina la instancia de Like de la base de datos
+    db.session.delete(existing_like)
+    db.session.commit()
+
+    return jsonify({"message": "User disliked successfully"}), 200
+
+@api.route("/followed-users/<int:user_id>", methods=["GET"])
+# @cross_origin(headers=["Content-Type", "Authorization"]) 
+@jwt_required()
+def get_followed_users(user_id):
+    # Obtener todos los usuarios seguidos por el usuario con el ID proporcionado
+    followed_likes = Like.query.filter_by(user_id=user_id).all()
+    followed_users_data = []
+    
+    for like in followed_likes:
+        user = User.query.get(like.liked_user_id)
+        if user:
+            followed_users_data.append({
+                "id": user.id,
+                "username": user.username,
+                "programming_language": user.programming_language,
+                "location": user.location  # Ajusta esto según tu modelo
+            })
+    
+    return jsonify(followed_users_data), 200
 

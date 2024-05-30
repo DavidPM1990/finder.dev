@@ -36,10 +36,18 @@ export default function PartnerProfile() {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [city, setCity] = useState('');
+    const [followers, setFollowers] = useState([]);
+
 
     useEffect(() => {
         const fetchProfile = async () => {
             const profile = await actions.getProfilePartner(userId);
+
+            const followed = await actions.getFollowedUsers(userId);
+
+            setFollowers(followed);
+
+
             setUserProfile(profile);
             setLoading(false);
 
@@ -50,7 +58,7 @@ export default function PartnerProfile() {
         };
 
         fetchProfile();
-    }, [actions, userId]);
+    }, []);
 
     const fetchCityName = async (latitude, longitude) => {
         const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`;
@@ -84,8 +92,9 @@ export default function PartnerProfile() {
     }
 
 
+
     return (
-        <section style={{ backgroundColor: '#eee' }}>
+        <section style={{ backgroundColor: '#000000' }}>
             <MDBContainer className="py-5 mt-5">
                 <MDBRow>
                     <MDBCol lg="4">
@@ -100,6 +109,21 @@ export default function PartnerProfile() {
                                 />
                                 <p className="text-muted mb-1">Full Stack Developer</p>
                                 <p className="text-muted mb-4">{city}</p>
+                                <div className="d-flex justify-content-around rounded-3 p-2 mb-2"
+                                    style={{ backgroundColor: '#efefef' }}>
+                                    <div>
+                                        <p className="small text-muted mb-1">Projects</p>
+                                        <p className="mb-0">0</p>
+                                    </div>
+                                    <div className="px-3">
+                                        <p className="small text-muted mb-1">Followers</p>
+                                        <p className="mb-0"></p>
+                                    </div>
+                                    <div>
+                                        <p className="small text-muted mb-1">Following</p>
+                                        <p className="mb-0">{followers.length}</p>
+                                    </div>
+                                </div>
                                 <div className="d-flex justify-content-around mb-2">
                                     <MDBBtn outline color="dark" rounded size="sm">+ Follow</MDBBtn>
                                     <MDBBtn outline color="dark" rounded size="sm">Add to favorite</MDBBtn>

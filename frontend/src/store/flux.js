@@ -3,7 +3,8 @@ const getState = ({ getStore, getActions, setStore }) => {
         store: {
             users: [],
             allUsers: [],
-            userPartner: []
+            userPartner: [],
+            followedUsers: []
 
         },
         actions: {
@@ -53,7 +54,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                         console.log("User signed in successfully!");
 
 
+                        // setStore({ users: data })
+
                         setStore({ users: { id: data.user_id } })
+
 
 
 
@@ -132,7 +136,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                     return null;
                 }
             },
-
             editProfile: async (userId, updatedData) => {
                 try {
                     const token = localStorage.getItem("jwt-token");
@@ -203,6 +206,105 @@ const getState = ({ getStore, getActions, setStore }) => {
                 } catch (error) {
                     console.error("Error getting all users:", error);
                     return null;
+                }
+            },
+            likeUser: async (likedUserId) => {
+                try {
+                    const token = localStorage.getItem("jwt-token");
+                    const response = await fetch(`http://localhost:5000/api/like/${likedUserId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        console.error("Error liking user:", data.message);
+                        return false;
+                    }
+
+                    const data = await response.json();
+                    console.log("User liked successfully:", data.message);
+
+                    // Obtiene el estado actual antes de actualizarlo
+                    const currentFollowedUsers = getStore().followedUsers;
+
+                    // Actualiza el estado con la nueva lista de followedUsers
+                    setStore({ followedUsers: currentFollowedUsers });
+
+                    // Comprueba si el followedUsers ha cambiado
+                    if (currentFollowedUsers !== data.users) {
+                        console.log("Followed users updated:", data.users);
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error("Error liking user:", error);
+                    return false;
+                }
+            },
+            dislikeUser: async (likedUserId) => {
+                try {
+                    const token = localStorage.getItem("jwt-token");
+                    const response = await fetch(`http://localhost:5000/api/dislike/${likedUserId}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        console.error("Error disliking user:", data.message);
+                        return false;
+                    }
+
+                    const data = await response.json();
+                    console.log("User disliked successfully:", data.message);
+
+
+                    const currentFollowedUsers = getStore().followedUsers;
+
+                    // Actualiza el estado con la nueva lista de followedUsers
+                    setStore({ followedUsers: currentFollowedUsers });
+
+                    // Comprueba si el followedUsers ha cambiado
+                    if (currentFollowedUsers !== data.users) {
+                        console.log("Followed users updated:", data.users);
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error("Error disliking user:", error);
+                    return false;
+                }
+            },
+            getFollowedUsers: async (userId) => {
+                try {
+                    const token = localStorage.getItem("jwt-token");
+                    const resp = await fetch(`http://localhost:5000/api/followed-users/${userId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+
+                        }
+                    });
+
+                    if (resp.ok) {
+                        const followedUsers = await resp.json();
+                        setStore({ followedUsers: followedUsers });
+                        return followedUsers;
+                    } else {
+                        console.error("Error fetching followed users");
+                        return false;
+                    }
+                } catch (error) {
+                    console.error("Error fetching followed users:", error);
+                    return false;
                 }
             },
         },

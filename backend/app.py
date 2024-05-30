@@ -19,7 +19,7 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 
-CORS(app)
+CORS(app, supports_credentials=True, expose_headers='Authorization')
 
 
 app.register_blueprint(create_user_blueprint(), url_prefix='/api')
@@ -28,7 +28,7 @@ app.register_blueprint(create_user_blueprint(), url_prefix='/api')
 def options(path):
     response = jsonify({'message': 'success'})
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')  # Agregar 'Authorization' aquí
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
     return response
 
