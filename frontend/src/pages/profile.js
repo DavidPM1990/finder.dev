@@ -156,6 +156,7 @@ export default function Profile() {
 
 
     console.log(likes_received)
+    console.log(user)
 
     return (
         <section style={{ backgroundColor: '#000000' }}>
@@ -181,7 +182,7 @@ export default function Profile() {
                                     </div>
                                     <div className="px-3">
                                         <p className="small text-muted mb-1">Followers</p>
-                                        <p className="mb-0">{likes_received ? likes_received.length : 0}</p>
+                                        <p className="mb-0">{likes_received.length ? likes_received.length : 0}</p>
                                     </div>
                                     <div>
                                         <p className="small text-muted mb-1">Following</p>

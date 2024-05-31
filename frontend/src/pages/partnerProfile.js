@@ -91,6 +91,8 @@ export default function PartnerProfile() {
         longitude = userProfile.location.lng;
     }
 
+    console.log(userProfile.likes_received.length)
+    console.log(userProfile)
 
 
     return (
@@ -117,7 +119,7 @@ export default function PartnerProfile() {
                                     </div>
                                     <div className="px-3">
                                         <p className="small text-muted mb-1">Followers</p>
-                                        <p className="mb-0"></p>
+                                        <p className="mb-0">{userProfile?.likes_received.length ? userProfile.likes_received.length : 0}</p>
                                     </div>
                                     <div>
                                         <p className="small text-muted mb-1">Following</p>

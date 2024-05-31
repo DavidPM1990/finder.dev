@@ -11,6 +11,7 @@ import NotFound from './pages/notFound';
 import Users from './pages/users';
 import PartnerProfile from './pages/partnerProfile';
 import Sidebar from './components/sidebar';
+import ChatView from './pages/chatView';
 
 const App = () => {
   const basename = process.env.BASENAME || "";
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/partner-profile/:userId" element={<PartnerProfile />} />
           <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/notfound" element={<NotFound />} />
+          <Route path="/chat" element={<ChatView />} />
         </Routes>
         {/* <RenderFooterIfNotAuthRoutes />
         </ScrollToTop> */}

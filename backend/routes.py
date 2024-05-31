@@ -9,43 +9,75 @@ from flask_jwt_extended import JWTManager
 from database import db
 from models import User, Like
 from flask_cors import cross_origin
+from flask_cors import CORS
+import requests
 
 api = Blueprint('api', __name__)
 
 def create_user_blueprint():
     return api
 
+CORS(api)
+
 
 @api.route('/create_user', methods=['POST'])
 def create_user():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    required_fields = ['username', 'email', 'password', 'programming_language', 'location']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'Missing {field} field'}), 400
+        required_fields = ['username', 'email', 'password', 'programming_language', 'location']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing {field} field'}), 400
 
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({'error': 'Username already exists'}), 400
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({'error': 'Email already exists'}), 400
-    
-    
-    hashed_password = generate_password_hash(data['password']).decode('utf-8')
+        if User.query.filter_by(username=data['username']).first():
+            return jsonify({'error': 'Username already exists'}), 400
+        if User.query.filter_by(email=data['email']).first():
+            return jsonify({'error': 'Email already exists'}), 400
 
-    new_user = User(
-        username=data['username'],
-        email=data['email'],
-        password=hashed_password, 
-        programming_language=data['programming_language'],
-        location=data['location']
-    )
+        hashed_password = generate_password_hash(data['password']).decode('utf-8')
 
-    db.session.add(new_user)
+        new_user = User(
+            username=data['username'],
+            email=data['email'],
+            password=hashed_password,
+            programming_language=data['programming_language'],
+            location=data['location']
+        )
 
-    db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    return jsonify({'message': 'User created successfully'}), 201
+        # Verificar si el usuario fue creado correctamente
+        created_user = User.query.filter_by(username=data['username'], email=data['email']).first()
+        if not created_user:
+            return jsonify({'error': 'Failed to create user in database'}), 500
+
+        chat_engine_data = {
+            "username": created_user.username,
+            "secret": data['password'],  # Send the raw password
+            "email": created_user.email,
+            "first_name": data.get('first_name', ''),
+            "last_name": data.get('last_name', '')
+        }
+
+        chat_engine_url = "https://api.chatengine.io/users/"
+        
+        chat_engine_headers = {
+            "PRIVATE-KEY": "21f2b22e-9f48-452b-b563-5713962cb324"
+        }
+
+        response = requests.post(chat_engine_url, json=chat_engine_data, headers=chat_engine_headers)
+
+        if response.status_code == 201:
+            return jsonify({'message': 'User signed up successfully'}), 201
+        else:
+            return jsonify({'error': f'Failed to sign up user with Chat Engine, status code: {response.status_code}'}), 500
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({'error': 'Internal server error'}), 500
+
 
 @api.route('/users', methods=['GET'])
 def get_users():
@@ -121,22 +153,36 @@ def edit_user():
 
 @api.route('/login', methods=['POST'])
 def log_in():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    # Verifico si todos los campos requeridos están presentes
-    if not all(field in data for field in ['username', 'password']):
-        return jsonify({"msg": "Missing fields"}), 400
+        if not all(field in data for field in ['username', 'password']):
+            return jsonify({"msg": "Missing fields"}), 400
 
-    # Obtengo el usuario de la base de datos según el nombre de usuario
-    user = User.query.filter_by(username=data['username']).first()
+        user = User.query.filter_by(username=data['username']).first()
 
-    # Verifico si el usuario existe y si la contraseña coincide
-    if user and check_password_hash(user.password, data['password']):
-        # Genero un token de acceso JWT
-        access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token, user_id=user.id), 200
-    else:
-        return jsonify({"msg": "Bad username or password"}), 401
+        if user and check_password_hash(user.password, data['password']):
+            access_token = create_access_token(identity=user.id)
+
+            chat_engine_response = requests.get(
+                'https://api.chatengine.io/users/me/',
+                headers={
+                    "Project-ID": "9fffc6a0-7f83-4687-8196-cd5119d2895b",
+                    "User-Name": data['username'],
+                    "User-Secret": data['password']
+                }
+            )
+
+            if chat_engine_response.status_code == 200:
+                return jsonify({"access_token": access_token, "user_id": user.id, "message": "Login successful"}), 200
+            else:
+                return jsonify({"error": "Chat Engine authentication failed"}), 401
+        else:
+            return jsonify({"msg": "Bad username or password"}), 401
+
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({'error': 'Internal server error'}), 500
     
 @api.route("/profile/<int:user_id>", methods=["GET", "PUT"])
 @jwt_required()

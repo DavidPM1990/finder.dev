@@ -118,11 +118,11 @@ export default function CardUser() {
 
     const isFollowed = followedUsers.includes(randomUsers[currentCard]?.id);
 
-    const userId = store.users.id
+    // const userId = store.users.id
 
     // console.log(currentCard)
-    console.log(userId)
-    console.log(followedUsers)
+    // console.log(userId)
+    // console.log(followedUsers)
 
 
 
